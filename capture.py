@@ -16,7 +16,7 @@ class ChessBoard:
         self.num_of_width = num_of_width
         self.num_of_height = num_of_height
         self.size_of_square = size_of_square
-        self.cap = cv2.VideoCapture(2)
+        self.cap = cv2.VideoCapture(0)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.frame_width)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.frame_height)
         self.save_cnt = 0
