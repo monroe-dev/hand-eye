@@ -7,18 +7,20 @@
 import numpy as np
 from math import *
 import transformations as tf
+import cv2
+import math
 
 # dummy = np.array([0, 0, 0, 1])
 dummy = np.array([[0, 0, 0, 1]])
 
 
-def homogeneous_matrix(R, tvec):
+def homogeneousMatrix(R, tvec):
     T = np.concatenate((R, tvec), axis=1)
     T = np.concatenate((T, dummy), axis=0)
     return T
 
 
-def homogeneous_inverse(T):
+def homogeneousInverse(T):
     R = T[:3, :3]
     t = T[:3, 3]
     t = np.expand_dims(t, axis=1)
@@ -60,7 +62,7 @@ def rotateZaxis(ang, is_deg):
     return rotZ
 
 
-def RotationMatrix(r, p, y, is_deg, is_homog):
+def rotationMatrix(r, p, y, is_deg, is_homog):
     """
     Generate a rotation matrix with 3 rotation such as roll, pitch, yaw
     Input: roll, pitch, yaw, bool type(degree or radian), bool type(3x3 or 4x4)
@@ -103,7 +105,7 @@ def homogeneousMatrix(x, y, z, rx, ry, rz, is_deg):
     Output: Matrix(type: numpy, shape: 4,4)
     """
     is_homog = True
-    homog_matrix = np.dot(translationMatrix(x, y, z), RotationMatrix(rx, ry, rz, is_deg, is_homog))
+    homog_matrix = np.dot(translationMatrix(x, y, z), rotationMatrix(rx, ry, rz, is_deg, is_homog))
     return homog_matrix
 
 def generatePointSet(num, dim, min, max):
@@ -144,3 +146,33 @@ def rotationFromHmgMatrix(T):
 def translationFromHmgMatrix(T):
     t = T[:3, 3]
     return t
+
+
+
+def rotMatrixToRodVector(R):
+    # a = (np.trace(R) - 1) / 2
+    # if a == -1:
+    #     rvec = np.array([sqrt((1 + R[0, 0]) / 2), sqrt((1 + R[1, 1]) / 2), sqrt((1 + R[2, 2]) / 2)])
+    # elif a == 1:
+    #     rvec = np.zeros(3)
+    # else:
+    #     to_normal = np.sqrt((3 - np.trace(R)) * (1 + np.trace(R)))
+    #     rvec = np.array([R[2, 1] - R[1, 2], R[0, 2] - R[2, 0], R[1, 0] - R[0, 1]] / to_normal)
+    # angle = math.acos((np.trace(R) - 1) / 2)
+    # print(np.linalg.inv(R))
+    # print(np.transpose(R))
+    # print(np.array_equal(np.transpose(R), np.linalg.inv(R)))
+    # print(np.sum(np.linalg.inv(R) - np.transpose(R)))
+    # print(math.isclose(np.sum(np.linalg.inv(R) - np.transpose(R)), 0.1e-30, rel_tol=0.01))
+    if np.linalg.det(R) == 1:
+        a = np.array(np.transpose(R))
+        b = np.linalg.inv(R)
+        if abs(np.sum(a - b)) < 1e-15:
+            rvec = np.empty((3, 1))
+            cv2.Rodrigues(R, rvec)
+            angle = np.linalg.norm(rvec)
+            norm_rvec = rvec / angle
+            return norm_rvec, angle
+    else:
+        print('This is not a rotation matrix...')
+
