@@ -49,3 +49,4 @@ for i in range(num_of_poses):
 
 
 print('Finished.')
+print('control')
