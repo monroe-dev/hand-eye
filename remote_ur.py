@@ -58,7 +58,7 @@ class UniversalRobot:
         URPose.close()
         return x, y, z, Rx, Ry, Rz
 
-    def moveUR(self, x, y, z, rx, ry, rz, acc, vel):
+    def movel(self, x, y, z, rx, ry, rz, acc, vel):
         move_msg = "movel(p[" + str(x) + "," + str(y) + "," + str(z) + "," + str(rx) + "," + str(ry) + "," + str(rz) \
                    + "]," + str(acc) + "," + str(vel) + ",0,0)\n"
         print(move_msg)

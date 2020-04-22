@@ -9,7 +9,6 @@ import numpy as np
 from numpy import linalg
 import kinematics as kin
 
-
 def newPose(type_of_motion, min_theta, max_theta, min_tvec, max_tvec):
     """
     Generate new random poses within the specific range (rvec and tvec)
@@ -20,9 +19,11 @@ def newPose(type_of_motion, min_theta, max_theta, min_tvec, max_tvec):
     """
     if type_of_motion == 'PT':
         tvec = np.random.uniform(min_tvec, max_tvec, (3, 1))
+        # theta is static angle..
         arb_theta = max_theta - min_theta
         R = kin.RotationMatrix(arb_theta, arb_theta * 2, arb_theta * 3, True, False)
     elif type_of_motion == 'PR':
+        # translation is static vector..
         arb_translation = max_tvec - min_tvec
         tvec = kin.translationVector(arb_translation, arb_translation * 2, arb_translation * 3)
         axis = np.random.uniform(-1, 1, (3, 1))
@@ -55,9 +56,9 @@ def generateNewPose(nPose, noise):
     pure_translation = 'PT'
     pure_rotation = 'PR'
     R_hand2eye, t_hand2eye = newPose(general_motion, np.deg2rad(10), np.deg2rad(50), 0.05, 0.5)
-    T_hand2eye = kin.homogeneous_matrix(R_hand2eye, t_hand2eye)
+    T_hand2eye = kin.homogMatfromRotAndTrans(R_hand2eye, t_hand2eye)
     R_base2world, t_base2world = newPose(general_motion, np.deg2rad(5), np.deg2rad(85), 0.5, 3.5)
-    T_base2world = kin.homogeneous_matrix(R_base2world, t_base2world)
+    T_base2world = kin.homogMatfromRotAndTrans(R_base2world, t_base2world)
 
     R_eye2world = np.zeros((1, 3, 3))
     t_eye2world = np.zeros((1, 3, 1))
@@ -67,8 +68,8 @@ def generateNewPose(nPose, noise):
     for i in range(nPose):
 
         R_base2hand_, t_base2hand_ = newPose(general_motion, np.deg2rad(5), np.deg2rad(40), 0.5, 1.5)
-        T_base2hand = kin.homogeneous_matrix(R_base2hand_, t_base2hand_)
-        T_eye2base = np.dot(kin.homogeneous_inverse(T_hand2eye), kin.homogeneous_inverse(T_base2hand))
+        T_base2hand = kin.homogMatfromRotAndTrans(R_base2hand_, t_base2hand_)
+        T_eye2base = np.dot(kin.homogeneousInverse(T_hand2eye), kin.homogeneousInverse(T_base2hand))
         T_eye2world = np.dot(T_eye2base, T_base2world)
         R_eye2world_ = T_eye2world[:3, :3]
         t_eye2world_ = T_eye2world[:3, 3]
@@ -161,3 +162,60 @@ def validate(numTest, numPose, numMethod):
     max_t_diff = np.max(t_diff[1:, :], axis=0)
 
     return rvec_diff[1:], t_diff[1:], mean_rvec_diff, mean_t_diff, std_rvec_diff, std_t_diff, max_rvec_diff, max_t_diff
+
+
+if __name__=="__main__":
+    import matplotlib.pyplot as plt
+    numTest = 30
+    numPose = 5
+    numMethod = 5
+
+    # CALIB_HAND_EYE_DANIILIDIS = 4
+    # CALIB_HAND_EYE_ANDREFF = 3
+    # CALIB_HAND_EYE_HORAUD = 2
+    # CALIB_HAND_EYE_PARK = 1
+    # CALIB_HAND_EYE_TSAI = 0
+
+    # Test
+    rvec_diff, t_diff, mean_rvec_diff, mean_t_diff, std_rvec_diff, std_t_diff, max_rvec_diff, max_t_diff = validate(numTest, numPose, numMethod)
+
+    # Print
+    print('Error analyis')
+    for i in range(numMethod):
+        print('Method', i, ': (Mean / Std / Max)')
+        print('Orientation(Rotation vector): ', mean_rvec_diff[i], '/', std_rvec_diff[i], '/', max_rvec_diff[i])
+        print('Position: ', mean_t_diff[i], '/', std_t_diff[i], '/', max_t_diff[i])
+
+    # Graph
+    fig = plt.figure(figsize=(12, 12))
+    # ax = fig.add_subplot(111)
+
+    plt1 = fig.add_subplot(221)
+    plt2 = fig.add_subplot(222)
+    plt3 = fig.add_subplot(223)
+    plt4 = fig.add_subplot(224)
+
+    for i in range(numMethod):
+        plt1.plot(rvec_diff[:, i])
+        plt2.plot(t_diff[:, i])
+        plt1.set_xlabel('Measurement number')
+        plt2.set_xlabel('Measurement number')
+
+    plt1.grid(True)
+    plt2.grid(True)
+    plt3.grid(True)
+    plt4.grid(True)
+    plt1.set_title('Orientation error')
+    plt2.set_title('Position error')
+    plt1.legend(('TSA', 'PAR', 'HOR', 'AND', 'DAN'))
+    plt2.legend(('TSA', 'PAR', 'HOR', 'AND', 'DAN'))
+
+    plt3.boxplot(rvec_diff)
+    plt4.boxplot(t_diff)
+    plt3.set_xlabel('Method')
+    plt4.set_xlabel('Method')
+
+    # plt.grid(True)
+
+    fig.savefig('result_handeye_calibration.png', dpi=300)
+    plt.show()

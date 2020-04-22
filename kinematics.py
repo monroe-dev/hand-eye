@@ -14,7 +14,7 @@ import math
 dummy = np.array([[0, 0, 0, 1]])
 
 
-def homogeneousMatrix(R, tvec):
+def homogMatfromRotAndTrans(R, tvec):
     T = np.concatenate((R, tvec), axis=1)
     T = np.concatenate((T, dummy), axis=0)
     return T
@@ -147,7 +147,10 @@ def translationFromHmgMatrix(T):
     t = T[:3, 3]
     return t
 
-
+def rodVectorToAngle(rvec):
+    angle = np.linalg.norm(rvec)
+    normal_rvec = rvec / angle
+    return angle, normal_rvec
 
 def rotMatrixToRodVector(R):
     # a = (np.trace(R) - 1) / 2
@@ -176,3 +179,7 @@ def rotMatrixToRodVector(R):
     else:
         print('This is not a rotation matrix...')
 
+
+def angleBtwVectors(a, b):
+    cos_ab = np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+    return math.acos(cos_ab)

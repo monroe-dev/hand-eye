@@ -10,13 +10,13 @@ import os
 
 
 class ChessBoard:
-    def __init__(self, frame_width, frame_height, num_of_width, num_of_height, size_of_square):
+    def __init__(self, video_port, frame_width, frame_height, num_of_width, num_of_height, size_of_square):
         self.frame_width = frame_width
         self.frame_height = frame_height
         self.num_of_width = num_of_width
         self.num_of_height = num_of_height
         self.size_of_square = size_of_square
-        self.cap = cv2.VideoCapture(0)
+        self.cap = cv2.VideoCapture(video_port)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.frame_width)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.frame_height)
         self.save_cnt = 0
