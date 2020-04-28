@@ -1,5 +1,5 @@
 """
-@File    : main.py
+@File    : control.py
 @Author  : Hyunsoo Shin
 @Date    : 20. 4. 16.
 @Contact : hyunsoo.shin@outlook.com
@@ -9,8 +9,7 @@ import remote_ur
 import capture
 import generate
 import time
-import chessboard
-
+import math
 print('Start!')
 
 # -- Connect the robot --- #
@@ -30,7 +29,6 @@ cam = capture.ChessBoard(0, 1920, 1280, 7, 9, 14)
 # ---Pose estimation(chessboard) --- #
 # cam.estimatePose(False)
 
-import math
 init_x = -0.1
 init_y = -0.3
 init_z = 0.4
@@ -44,14 +42,11 @@ p = generate.Pose(init_x, init_y, init_z, init_rx, init_ry, init_rz)
 robotPose = p.loadPose()
 num_of_poses = len(robotPose)
 
-
 for i in range(num_of_poses):
     # ur.movel(robotPose[i][0], robotPose[i][1], robotPose[i][2], robotPose[i][3], robotPose[i][4], robotPose[i][5], 0.1, 0.1)
     # time.sleep(3)
     cam.save()
     time.sleep(0.1)
     print(i + 1,  "th image was captured.")
-
-
 
 print('Finished.')

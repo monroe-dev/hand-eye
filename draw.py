@@ -108,3 +108,39 @@ def RotZ(psi):
     return np.array([[np.cos(psi), -np.sin(psi), 0],
                      [np.sin(psi), np.cos(psi), 0],
                      [0, 0, 1]])
+
+if __name__ =="__main__":
+    print('start')
+    import kinematics as kin
+    import cv2
+    ORG = np.array([0, 0, 0])
+    a = [1, 1, 1]
+    rotation_vector = np.array([0.0, 0.0, 1.0])
+
+    # 1
+    rot_matrix = np.zeros((3, 3))
+    norm_rotation_vector = rotation_vector / np.linalg.norm(rotation_vector)
+    print('norm_rotation_vector', norm_rotation_vector)
+    print('norm rvec', rotation_vector)
+    cv2.Rodrigues(norm_rotation_vector, rot_matrix)
+    print('rot_matrix from cv2.Rodrigues\n', rot_matrix)
+
+    # 2
+    # rot_matrix = RotZ(np.deg2rad(10))
+    rotated_a = np.dot(rot_matrix, np.transpose(a))
+    print('a', a)
+    print('rotated_a', rotated_a)
+
+    b = np.array([0.1, 0.1, 0.1])
+    norm_b = np.linalg.norm(b)
+    normal_b = b / norm_b
+    print('b', b)
+    print('normal_b', normal_b)
+
+    # Draw
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111, projection='3d')
+    # drawVector(ax, ORG, a)
+    # drawVector(ax, ORG, rotated_a, lineColor='b')
+    # drawVector(ax, ORG, norm_rotation_vector, lineColor='r')
+    # plt.show()

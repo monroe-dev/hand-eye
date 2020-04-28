@@ -1,5 +1,5 @@
 """
-@File    : select.py
+@File    : generate.py
 @Author  : Hyunsoo Shin
 @Date    : 20. 4. 17.
 @Contact : hyunsoo.shin@outlook.com
@@ -81,7 +81,6 @@ if __name__ == "__main__":
         # _, ur_rvec = kin.rodVectorToAngle(ur_ori[])
         # ur_rvec.
 
-
     ORG = np.array([0, 0, 0])
     X_axis = np.array([1, 0, 0])
     Y_axis = np.array([0, 1, 0])
@@ -92,7 +91,8 @@ if __name__ == "__main__":
     n = 0
     for i in range(len(ur_pose)):
         _, ur_rvec = kin.rodVectorToAngle(ur_ori[i])
-        dR.drawVector(ax, ORG, ur_rvec, arrowstyle='-|>', proj=False, pointEnable=False) #, annotationString=' $ ^{A}P $ '
+        print(ur_rvec.shape)
+        dR.drawVector(ax, ORG, ur_rvec, g, proj=False, pointEnable=False) #, annotationString=' $ ^{A}P $ '
 
     dR.drawPointWithAxis(ax, ORG, X_axis, Y_axis, Z_axis, pointEnable=True, lineWidth=2)
     # dR.drawPointWithAxis(ax, BORG, hat_X_atB, hat_Y_atB, hat_Z_atB, pointEnable=False, lineStyle='--')

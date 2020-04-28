@@ -28,6 +28,16 @@ def homogeneousInverse(T):
     invT = np.concatenate((invT, dummy), axis=0)
     return invT
 
+
+# def rotate(original_vector, rotation_matrix):
+#     """
+#     Input: Angle for rotation, bool type(degree or radian)
+#     Return: Rotation matrix(type: numpy, shape: 3,3)
+#     """
+#     rotated_vec = np.dot(rotation_matrix, original_vector)
+#     return rotated_vec
+
+
 def rotateXaxis(ang, is_deg):
     """
     Input: Angle for rotation, bool type(degree or radian)
@@ -148,6 +158,12 @@ def translationFromHmgMatrix(T):
     return t
 
 def rodVectorToAngle(rvec):
+    """
+    cv2.Rodrigues function returns rotation vector with angle, so the norm of the vector isn't 1.
+
+    :param rvec:
+    :return:
+    """
     angle = np.linalg.norm(rvec)
     normal_rvec = rvec / angle
     return angle, normal_rvec
@@ -167,17 +183,27 @@ def rotMatrixToRodVector(R):
     # print(np.array_equal(np.transpose(R), np.linalg.inv(R)))
     # print(np.sum(np.linalg.inv(R) - np.transpose(R)))
     # print(math.isclose(np.sum(np.linalg.inv(R) - np.transpose(R)), 0.1e-30, rel_tol=0.01))
-    if np.linalg.det(R) == 1:
+
+    if np.isclose(np.linalg.det(R), 1):
         a = np.array(np.transpose(R))
         b = np.linalg.inv(R)
-        if abs(np.sum(a - b)) < 1e-15:
+        # print('A^-1 - A^T = ', np.sum(a - b))
+        if abs(np.sum(a - b)) < 1e-10:
+            # print('The inverse matrix was same with transpose matrix(Second property).')
             rvec = np.empty((3, 1))
             cv2.Rodrigues(R, rvec)
             angle = np.linalg.norm(rvec)
-            norm_rvec = rvec / angle
-            return norm_rvec, angle
+            if np.isclose(angle, 0):
+                print('Angle is almost zero.')
+            else:
+                norm_rvec = rvec / angle
+                return norm_rvec, angle
+    elif np.isclose(np.linalg.det(R), -1):
+        print('This matrix', R, ' is improper rotation(roto-reflection).')
+
     else:
-        print('This is not a rotation matrix...')
+        print('This matrix', R, ' is not a rotation matrix.')
+        print('The determinant of R:', np.linalg.det(R))
 
 
 def angleBtwVectors(a, b):
